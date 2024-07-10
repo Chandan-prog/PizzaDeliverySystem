@@ -23,19 +23,11 @@ def read_pizzas(db: Session = Depends(database.get_db)):
 
 
 @router.put("/pizzas/{pizza_id}", response_model=schemas.Pizza)
-def update_pizza(pizza_id: int, pizza: schemas.PizzaUpdate, db: Session = Depends(database.get_db)):
+def update_pizza(pizza_id: int, pizza: schemas.Pizza, db: Session = Depends(database.get_db)):
     db_pizza = crud.update_pizza(db, pizza)
     if db_pizza is None:
         raise HTTPException(status_code=404, detail="Pizza not found")
     return db_pizza
-
-# @router.put("/pizzas/{pizza_id}", response_model=schemas.Pizza)
-# def update_pizza(pizza_id: int, pizza: schemas.PizzaUpdate, db: Session = Depends(database.get_db)):
-#     db_pizza = crud.get_pizza(db, pizza_id)
-#     if db_pizza is None:
-#         raise HTTPException(status_code=404, detail="Pizza not found")
-#     updated_pizza = crud.update_pizza(db, pizza_id, pizza)
-#     return updated_pizza
 
 
 @router.delete("/pizzas/{pizza_id}", response_model=schemas.Pizza)
@@ -44,3 +36,4 @@ def delete_pizza(pizza_id: int, db: Session = Depends(database.get_db)):
     if db_pizza is None:
         raise HTTPException(status_code=404, detail="Pizza not found")
     return db_pizza
+

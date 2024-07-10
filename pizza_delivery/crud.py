@@ -18,7 +18,7 @@ def create_pizza(db: Session, pizza: schemas.PizzaCreate):
     db.refresh(db_pizza)
     return db_pizza
 
-def update_pizza(db: Session, pizza: schemas.PizzaUpdate):
+def update_pizza(db: Session, pizza: schemas.Pizza):
     db_pizza = db.query(models.Pizza).filter(models.Pizza.id == pizza.id).first()
     if db_pizza:
         for key, value in pizza.model_dump().items():
@@ -54,23 +54,47 @@ def get_user(db: Session, user_id: int):
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
-def create_order(db: Session, order: schemas.OrderCreate, customer_id: int):
-    db_order = models.Order(
-        customer_id=customer_id, status=order.status, total_price=order.total_price
-    )
+def get_cart(db: Session, user_id: int):
+    return db.query(models.Cart).filter(models.Cart.user_id == user_id).first()
+
+def create_cart(db: Session, cart: schemas.CartCreate):
+    db_cart = models.Cart(**cart.dict())
+    db.add(db_cart)
+    db.commit()
+    db.refresh(db_cart)
+    return db_cart
+
+def add_item_to_cart(db: Session, cart_item: schemas.CartItemCreate, cart_id: int):
+    db_cart_item = models.CartItem(**cart_item.dict(), cart_id=cart_id)
+    db.add(db_cart_item)
+    db.commit()
+    db.refresh(db_cart_item)
+    return db_cart_item
+
+def get_orders(db: Session, user_id: int):
+    return db.query(models.Order).filter(models.Order.user_id == user_id).all()
+
+
+def create_order(db: Session, order: schemas.OrderCreate, user_id: int):
+    db_order = models.Order(user_id=user_id, total=order.total, status=order.status)
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
-    for pizza in order.pizzas:
-        order_pizza = models.OrderPizza(
-            order_id=db_order.id, pizza_id=pizza.pizza_id, quantity=pizza.quantity
-        )
-        db.add(order_pizza)
-    db.commit()
+    
+    # Create order items
+    for item in order.items:
+        db_order_item = models.OrderItem(order_id=db_order.id, **item.dict())
+        db.add(db_order_item)
+        db.commit()
+        db.refresh(db_order_item)
+    
     return db_order
 
-def get_orders(db: Session, customer_id: int):
-    return db.query(models.Order).filter(models.Order.customer_id == customer_id).all()
+def create_order_item(db: Session, order_item: schemas.OrderItemCreate):
+    db_order_item = models.OrderItem(**order_item.dict())
+    db.add(db_order_item)
+    db.commit()
+    db.refresh(db_order_item)
+    return db_order_item
 
-def get_order(db: Session, order_id: int):
-    return db.query(models.Order).filter(models.Order.id == order_id).first()
+
