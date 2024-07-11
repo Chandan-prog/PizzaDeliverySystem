@@ -97,4 +97,16 @@ def create_order_item(db: Session, order_item: schemas.OrderItemCreate):
     db.refresh(db_order_item)
     return db_order_item
 
+def get_all_orders(db: Session):
+    return db.query(models.Order).all()
 
+def get_order(db: Session, order_id: int):
+    return db.query(models.Order).filter(models.Order.id == order_id).first()
+
+def update_order_status(db: Session, order_id: int, status: str):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if db_order:
+        db_order.status = status
+        db.commit()
+        db.refresh(db_order)
+    return db_order

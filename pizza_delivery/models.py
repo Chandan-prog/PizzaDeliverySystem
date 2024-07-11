@@ -33,7 +33,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     is_delivery_partner = Column(Boolean, default=False)
-    cart = relationship("Cart", back_populates="user", uselist=False)
+    cart = relationship("Cart", back_populates="user", uselist=False)   #uselist tells one to one relationship
     orders = relationship("Order", back_populates="user", foreign_keys=[Order.user_id])
     delivery_orders = relationship("Order", back_populates="delivery_partner", foreign_keys=[Order.delivery_partner_id])
 
@@ -59,10 +59,6 @@ class CartItem(Base):
     pizza = relationship("Pizza")
 
 
-
-
-
-
 class OrderItem(Base):
     __tablename__ = 'order_items'
     id = Column(Integer, primary_key=True, index=True)
@@ -75,3 +71,19 @@ class OrderItem(Base):
 User.cart = relationship("Cart", back_populates="user", uselist=False)
 User.orders = relationship("Order", back_populates="user", foreign_keys=[Order.user_id])
 User.delivery_orders = relationship("Order", back_populates="delivery_partner", foreign_keys=[Order.delivery_partner_id])
+
+# These lines establish relationships on the User model after all the related models (Cart, Order) have been fully defined. 
+# This is necessary because these relationships reference columns and models that may not be fully available until all models are declared.
+
+# User.cart:
+
+# Establishes a one-to-one relationship between User and Cart.
+# uselist=False ensures that a user can have only one cart.
+# User.orders:
+
+# Establishes a one-to-many relationship between User and Order based on the user_id foreign key in Order.
+# User.delivery_orders:
+
+# Establishes a one-to-many relationship between User and Order based on the delivery_partner_id foreign key in Order.
+# These relationships allow us to navigate from a User to their cart, orders, and delivery_orders, 
+# enabling efficient querying and data manipulation within the system.
