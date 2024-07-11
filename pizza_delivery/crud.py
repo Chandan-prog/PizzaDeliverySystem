@@ -76,7 +76,7 @@ def get_orders(db: Session, user_id: int):
 
 
 def create_order(db: Session, order: schemas.OrderCreate, user_id: int):
-    db_order = models.Order(user_id=user_id, total=order.total, status=order.status)
+    db_order = models.Order(user_id=user_id, total=order.total, status=order.status, delivery_partner_id=order.delivery_partner_id)
     db.add(db_order)
     db.commit()
     db.refresh(db_order)

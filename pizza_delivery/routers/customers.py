@@ -4,6 +4,7 @@ from .. import crud, schemas, models, database
 from .auth import get_current_user
 from typing import List
 from datetime import datetime
+from sqlalchemy.sql import func
 
 router = APIRouter()
 
@@ -38,14 +39,17 @@ def create_order( db: Session = Depends(database.get_db), current_user: schemas.
     
     # Calculate total based on items in the cart
     total = sum(item.quantity * item.pizza.price for item in db_cart.items)
-    
-    # Create OrderCreate object with all necessary fields
+
+    delivery_partner = db.query(models.User).filter(models.User.is_delivery_partner==1).order_by(func.random()).first()
+
+
     order_create = schemas.OrderCreate(
         items=[schemas.OrderItemCreate(pizza_id=item.pizza_id, quantity=item.quantity) for item in db_cart.items],
         user_id=current_user.id,
         total=total,
         status="Pending",
-        created_at=datetime.utcnow()  # Set current datetime for created_at
+        created_at=datetime.utcnow(),  # Set current datetime for created_at
+        delivery_partner_id=delivery_partner.id if delivery_partner else None  # Set delivery_partner_id if available
     )
     
     # Create order in database

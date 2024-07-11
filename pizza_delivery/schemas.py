@@ -80,6 +80,7 @@ class OrderCreate(BaseModel):
     total: float
     status: str
     created_at: datetime
+    delivery_partner_id: Optional[int]
 
     class Config:
         orm_mode = True
